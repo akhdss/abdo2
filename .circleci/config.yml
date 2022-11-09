@@ -36,6 +36,11 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
+      #tar utility is not present in this image but it is required. Please install it to have workflow workspace capability.
+      - run:
+          name: Install tar utility
+          command: |
+            yum install -y tar gzip
       - run: 
           command: |
             aws ec2 describe-instances \

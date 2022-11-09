@@ -41,6 +41,8 @@ jobs:
           name: Install tar utility
           command: |
             yum install -y tar gzip
+      - run:
+          command: echo [all] > ~/inventory.txt
       - run: 
           command: |
             aws ec2 describe-instances \

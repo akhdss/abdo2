@@ -31,10 +31,38 @@ jobs:
               --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
               --region us-east-1
 
+  configure_infrastructure: 
+    docker:
+      - image: 
+    steps:
+      - checkout
+      - add_ssh_keys:
+          # You can get this ID in the section where you registered the SSH Key
+          fingerprints: ["2e:0a:d8:7a:c4:73:53:ee:a2:86:1d:b6:a0:c5:db:cb"] 
+      - run: 
+        command: |
+          aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filters "Name=tag:project,Values=udacity" \
+            --output text >> inventory.txt
+
+      - run:
+          name: Install Ansible
+          command: |
+            apk add --update ansible
+      - run:
+          name: Run Playbook and Configure server
+          command: |
+            ansible-playbook -i inventory.txt main-remote.yml
+
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
   say-hello-workflow:
     jobs:
       - create_infrastructure
+      - configure_infrastructure:
+          requires:
+            - create_infrastructure
+      
       #- say-hello

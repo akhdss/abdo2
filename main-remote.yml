@@ -1,0 +1,27 @@
+---
+ # Exercise for setting up a web server in an EC
+- name: Exercise for setting up a web server in an EC 
+   # hosts: ubuntu
+   # Use the public IP if the VM is already created 
+  hosts: all
+  user: ubuntu
+  vars:
+    - ansible_python_interpreter: /usr/bin/python3
+    - ansible_host_key_checking: false
+    - ansible_stdout_callback: yaml
+  become: true
+  become_method: sudo
+  become_user: root
+  pre_tasks:
+    - name: "wait 600 seconds for target connection to become reachable/usable."
+      wait_for_connection:
+         delay: 60
+         timeout: 300
+
+    - name: "install python for Ansible."
+      become: true
+      raw: test -e /usr/bin/python3 || (apt -y update && apt install -y python3)
+      changed_when: false
+  
+  roles:
+   - setup

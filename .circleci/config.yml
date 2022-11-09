@@ -42,12 +42,18 @@ jobs:
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --filters "Name=tag:project,Values=udacity" \
               --output text >> inventory.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:  
+            - inventory.txt
 
   configure_infrastructure: 
     docker:
       - image: python:3.7-alpine3.11
     steps:
       - checkout
+      - attach_workspace:
+          at: ~/
       - add_ssh_keys:
           # You can get this ID in the section where you registered the SSH Key
           fingerprints: ["2e:0a:d8:7a:c4:73:53:ee:a2:86:1d:b6:a0:c5:db:cb"] 
@@ -58,7 +64,7 @@ jobs:
       - run:
           name: Run Playbook and Configure server
           command: |
-            ansible-playbook -i inventory.txt main-remote.yml
+            ansible-playbook -i ~/inventory.txt main-remote.yml
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
